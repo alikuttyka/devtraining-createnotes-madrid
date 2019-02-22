@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[function($rootScope,$scope) {
+	/* widget controller */
+	var c = this;
+
+	$rootScope.$on("getIncident", function(event, data){
+		console.log($rootScope.id);
+		c.server.get({
+			action: 'getIncident',
+			id: $rootScope.id
+		}).then(function(r){
+			//Unable to access the c.data from server directly
+			c.data.number = r.data.inc.number;
+			c.data.priority = r.data.inc.priority;
+			c.data.short_description = r.data.inc.short_description;
+			c.data.id = r.data.inc.sys_id;
+		});
+	});
+
+	c.updateData = function(id){
+		console.log(c.data.number +" - "+c.data.priority);
+
+		c.server.get({
+			action: 'updateIncident',
+			number: c.data.number,
+			priority: c.data.priority,
+			short_description: c.data.short_description
+		}).then(function(r){
+			 $rootScope.number = r.data.inc.number;
+			 $rootScope.short_description = r.data.inc.short_description;
+			 $rootScope.$emit('updateList');
+		})
+	}
+}]]></client_script>
+        <controller_as>c</controller_as>
+        <css/>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>true</has_preview>
+        <id>record_data</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {  }]]></link>
+        <name>Record Data</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+	/* populate the 'data' object */
+	/* e.g., data.table = $sp.getValue('table'); */
+	//Server data dont persist between 2 http sessions
+
+	data.inc = {};
+	var incident = new GlideRecord('incident');
+	if(input && input.action == 'getIncident'){
+		var id = input.id;
+		incident.get(id);
+	}else if(input && input.action == 'updateIncident'){
+		incident.get('number', input.number);
+		incident.short_description = input.short_description;
+		incident.impact = input.priority;
+		incident.update();			
+	}
+	$sp.getRecordValues(data.inc, incident, "number, short_description, priority, assignment_group, sys_id");
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2019-02-21 16:53:42</sys_created_on>
+        <sys_id>339682050f77a700eba2cfdce1050e36</sys_id>
+        <sys_mod_count>56</sys_mod_count>
+        <sys_name>Record Data</sys_name>
+        <sys_package display_value="CreateNotes" source="x_snc_createnotes">df5fd9a5090232007f44e1046c8ff69f</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="CreateNotes">df5fd9a5090232007f44e1046c8ff69f</sys_scope>
+        <sys_update_name>sp_widget_339682050f77a700eba2cfdce1050e36</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2019-02-22 05:40:34</sys_updated_on>
+        <template><![CDATA[<div ng-show="c.data.id">
+  <!-- your widget template -->
+  <div>
+  Number: <input ng-model="c.data.number"> <br>
+  Priority: <input ng-model="c.data.priority">
+</div>
+<div>
+  Short description<textarea ng-model="c.data.short_description"></textarea> <br>
+  <input type="button" value="Update" ng-click="c.updateData(c.data.id)">
+</div>
+
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

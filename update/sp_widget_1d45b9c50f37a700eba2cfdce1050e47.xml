@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[function(spUtil, $rootScope,$scope) {
+	/* widget controller */
+	var c = this;
+
+	c.selectIncident = function(index){
+		//spUtil.addInfoMessage("Selected:"+c.data.incidents[index].number);
+		$rootScope.id = c.data.incidents[index].sys_id;
+		$rootScope.$emit('getIncident');
+	}
+	
+	c.newIncident = function(){
+		
+	}
+
+	$rootScope.$on("updateList", function(event, data){
+		for(var x=0; x<c.data.incidents.length; x++){
+			if(c.data.incidents[x].number == $rootScope.number){
+				c.data.incidents[x].short_description = $rootScope.short_description;
+			}
+		}
+	});
+
+}]]></client_script>
+        <controller_as>c</controller_as>
+        <css>.row{
+ border-style: groove; 
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>true</has_preview>
+        <id>display</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {  }]]></link>
+        <name>Display</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+	/* populate the 'data' object */
+	/* e.g., data.table = $sp.getValue('table'); */
+
+	data.incidents = [];
+	data.head = "Incidents";
+
+	var inc = new GlideRecord('incident');
+	inc.addEncodedQuery('active=true');
+	inc.setLimit(5);
+	inc.query();
+	while(inc.next()){
+		var record = {};
+		$sp.getRecordDisplayValues(record, inc, "number, short_description, priority, assignment_group, sys_id");
+		data.incidents.push(record);
+	}
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2019-02-21 15:37:54</sys_created_on>
+        <sys_id>1d45b9c50f37a700eba2cfdce1050e47</sys_id>
+        <sys_mod_count>50</sys_mod_count>
+        <sys_name>Display</sys_name>
+        <sys_package display_value="CreateNotes" source="x_snc_createnotes">df5fd9a5090232007f44e1046c8ff69f</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="CreateNotes">df5fd9a5090232007f44e1046c8ff69f</sys_scope>
+        <sys_update_name>sp_widget_1d45b9c50f37a700eba2cfdce1050e47</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2019-02-22 05:57:42</sys_updated_on>
+        <template><![CDATA[<div>
+  <div class="header">
+    <p>
+      {{c.data.head}}
+    <input type="button" value="New" ng-click="c.newIncident()">
+    </p>
+  </div>
+
+  <div class="row" ng-click= "c.selectIncident($index)" ng-repeat="x in c.data.incidents">
+    <h5>
+      {{x.number}}
+    </h5>
+    <p>
+      Short description: {{x.short_description}}
+    </p>
+  </div>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>
